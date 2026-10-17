@@ -1,15 +1,24 @@
 package frames
 
-var Forrest = DefaultFrameType(forrestFrames)
+import (
+	"math"
+	"strings"
+)
 
-var forrestFrames = []string{
-	                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+// The first 7 frames are the running figure. They are squashed vertically
+// (terminal cells are ~2x taller than wide) and then widened horizontally.
+// Banner/block frames are untouched.
+var Bodypack = DefaultFrameType(reshapeFigureFrames(bodypackFrames, 7))
+
+var bodypackFrames = []string{
+`
+
+
+
+
+
+
+
                                        ...                                      
                                      =%%*%+                                     
                                     =*.   +=                                    
@@ -73,22 +82,23 @@ var forrestFrames = []string{
                       :%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*-                      
                        .-====++++++++++++++++++++++===--:                       
                          ....::::::::::::::::::::::....                         
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
                                            ..                                   
                                           #@@#                                  
                                          #%: .#.                                
@@ -100,7 +110,7 @@ var forrestFrames = []string{
                          +%%%%%%%%%#############%%%#%%%#                        
                          %%%%%%%%%%###########*##%%%%%%%.                       
                         #%%%%%%%%%%############%%@%%@%@@.                       
-                        #%%%%%%%%%%###########%%%@@%@@@@.                       
+                        #%%%%%%%%%%###########%%%@@%@@@@.                      
                        .%%%%%%%%%%%###########%%%%%%@@@%:                       
                        .%%%%%%%%%%%###########%%%%%@@@%%+                       
                        .%%%%%%%%%%##########*#%##%@@@%%%@                       
@@ -153,24 +163,25 @@ var forrestFrames = []string{
                              ..::--==+*##%#%%%%%%%%%@*=:.                       
                                   ...::--==++**#%%*+-:.                         
                                          ...:::---:..                           
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
+
                                               =+                                
                                              .#+                                
                                    . ........-%:                                
@@ -227,30 +238,32 @@ var forrestFrames = []string{
                         =%###*#######%%%%%%%%%%%%#%+                            
                           *%%%#####%%%%%%%%%%%%%%%@+                            
                             :######%%%%%%%%%%%%%%@@.                            
-                             +#%##%%%%%%%%%%%%%%@@*                             
+                             +%##%%%%%%%%%%%%%%@@*                             
                              :##%%%%%%%%%%%%%%%%%@.                             
                               :%%%%%%%%%%%%%%%%%%:                              
                                .+*#%%%%%%%%%%%%%+                               
                                 .:::------====-:.                               
                                           .....                                 
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
                                        ...                                      
                                       #%-*#+                                    
                                      *:   .**                                   
@@ -314,25 +327,27 @@ var forrestFrames = []string{
                        .*%@@@@%@@@@@@@@@@@@@@@@@@@@@@@%+                        
                         .-============================-.                        
                           ............................                          
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
+
                                 +=                                              
                                 +#.                                             
                                 :%-........ .                                   
@@ -395,24 +410,28 @@ var forrestFrames = []string{
                                +%%%%%%%%%%%%%#*+.                               
                                .:-====------::..                                
                                  .....                                          
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
                                    ..                                           
                                  :%@%#                                          
                                 .#. -##                                         
@@ -477,23 +496,25 @@ var forrestFrames = []string{
                        .:=*%%%%%%%%%%#%#**+==-::...                             
                          .:-+*%#***+==---::..                                   
                            ..:---:::...                                         
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
                                    ....                                         
                                   =%-%%+                                        
                                  .*   :@+                                       
@@ -559,47 +580,49 @@ var forrestFrames = []string{
                            .-*%%@@@%#*=-.                                       
                             .-*#*##+=:.                                         
                              .:----:.                                           
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
      #****-    :*@@*:  -#****-  *#*. .*#*-***#*=.   *#*+    :*@@*:  =*#: -##-   
     .@@@@@@@  .@@@@@@: =@@@@@@# *@@: -@@+=@@@@@@%   @@@%   .@@@@@@: *@@- #@@:   
     .@@@@@@@= %@@@@@@@ =@@@@@@@:-@@= #@@:=@@@@@@@= :@@@@.  @@@@@@@% *@@-.@@@    
@@ -616,71 +639,76 @@ var forrestFrames = []string{
     .@@@@@@@* %@@@@@@@ =@@@@@@@:   @@@.  =@@*     @@@==@@@ %@@@@@@% *@@- %@@-   
     .@@@@@@@: .@@@@@@: =@@@@@@#    @@@.  =@@*    .@@@  @@@..@@@@@@: *@@- +@@#   
      =====-.   .+##+:  :=====:     ===   :==-    :===  ===. :=##+:  -==. .===   
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`,
+`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
      #****-    :*@@*:  -#****-  *#*. .*#*-***#*=.   *#*+    :*@@*:  =*#: -##-   
     .@@@@@@@  .@@@@@@: =@@@@@@# *@@: -@@+=@@@@@@%   @@@%   .@@@@@@: *@@- #@@:   
     .@@@@@@@= %@@@@@@@ =@@@@@@@:-@@= #@@:=@@@@@@@= :@@@@.  @@@@@@@% *@@-.@@@    
@@ -697,39 +725,44 @@ var forrestFrames = []string{
     .@@@@@@@* %@@@@@@@ =@@@@@@@:   @@@.  =@@*     @@@==@@@ %@@@@@@% *@@- %@@-   
     .@@@@@@@: .@@@@@@: =@@@@@@#    @@@.  =@@*    .@@@  @@@..@@@@@@: *@@- +@@#   
      =====-.   .+##+:  :=====:     ===   :==-    :===  ===. :=##+:  -==. .===   
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-                                                                                
-,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`,
+`
                                                                                 
                                                                                 
                                                                                 
@@ -810,7 +843,8 @@ var forrestFrames = []string{
                                                                                 
                                                                                 
                                                                                 
-,
+`,
+`
                                                                                 
                                                                                 
                                                                                 
@@ -891,7 +925,8 @@ var forrestFrames = []string{
                                                                                 
                                                                                 
                                                                                 
-,
+`,
+`
                                                                                 
                                                                                 
                                                                                 
@@ -972,4 +1007,107 @@ var forrestFrames = []string{
                                                                                 
                                                                                 
                                                                                 
+`,
+}
+
+// Brightness ramp from empty to dense, matching the chars used in the frames.
+const brightnessRamp = " .:-=+*#%@"
+
+// canvasWidth is the fixed frame width. Keeping it fixed (instead of measuring
+// each frame) stops the figure from jittering between frames.
+const canvasWidth = 80
+
+// figureWidthStretch widens the figure around the canvas center.
+// 1.0 = no change. Try 1.3 to 1.8. Above ~1.7 the figure may be cut off at the edges.
+const figureWidthStretch = 1.6
+
+func brightnessLevel(b byte) int {
+	if i := strings.IndexByte(brightnessRamp, b); i >= 0 {
+		return i
+	}
+	return 0
+}
+
+func levelAt(s string, i int) int {
+	if i < 0 || i >= len(s) {
+		return 0
+	}
+	return brightnessLevel(s[i])
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func splitFrame(frame string) ([]string, bool) {
+	trailingNL := strings.HasSuffix(frame, "\n")
+	return strings.Split(strings.TrimSuffix(frame, "\n"), "\n"), trailingNL
+}
+
+func joinFrame(lines []string, trailingNL bool) string {
+	res := strings.Join(lines, "\n")
+	if trailingNL {
+		res += "\n"
+	}
+	return res
+}
+
+// squashFrame merges every 2 rows into 1 (averaging per-column brightness),
+// compensating for terminal cells being ~2x taller than wide.
+func squashFrame(frame string) string {
+	lines, trailingNL := splitFrame(frame)
+
+	out := make([]string, 0, (len(lines)+1)/2)
+	for i := 0; i < len(lines); i += 2 {
+		a := lines[i]
+		b := ""
+		if i+1 < len(lines) {
+			b = lines[i+1]
+		}
+
+		w := maxInt(len(a), len(b))
+		row := make([]byte, w)
+		for x := 0; x < w; x++ {
+			la := levelAt(a, x)
+			lb := levelAt(b, x)
+			row[x] = brightnessRamp[(la+lb+1)/2]
+		}
+		out = append(out, strings.TrimRight(string(row), " "))
+	}
+	return joinFrame(out, trailingNL)
+}
+
+// widenFrame stretches every row horizontally around the canvas center,
+// blending neighbouring columns so the result stays smooth.
+func widenFrame(frame string, factor float64) string {
+	lines, trailingNL := splitFrame(frame)
+	center := float64(canvasWidth-1) / 2
+
+	out := make([]string, len(lines))
+	for i, l := range lines {
+		row := make([]byte, canvasWidth)
+		for x := 0; x < canvasWidth; x++ {
+			sx := center + (float64(x)-center)/factor
+			x0 := int(math.Floor(sx))
+			t := sx - float64(x0)
+			v := float64(levelAt(l, x0))*(1-t) + float64(levelAt(l, x0+1))*t
+			row[x] = brightnessRamp[int(v+0.5)]
+		}
+		out[i] = strings.TrimRight(string(row), " ")
+	}
+	return joinFrame(out, trailingNL)
+}
+
+// reshapeFigureFrames squashes (vertically) and widens only the first n frames
+// (the running figure), leaving the banner and block frames untouched.
+func reshapeFigureFrames(frames []string, n int) []string {
+	res := make([]string, len(frames))
+	copy(res, frames)
+	for i := 0; i < n && i < len(res); i++ {
+		res[i] = widenFrame(squashFrame(res[i]), figureWidthStretch)
+	}
+	return res
 }
