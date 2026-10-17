@@ -8,7 +8,15 @@ import (
 // The first 7 frames are the running figure. They are squashed vertically
 // (terminal cells are ~2x taller than wide) and then widened horizontally.
 // Banner/block frames are untouched.
-var Bodypack = DefaultFrameType(reshapeFigureFrames(bodypackFrames, 7))
+var Bodypack = DefaultFrameType(
+	repeatFrames(
+		tweenFigureFrames(reshapeFigureFrames(bodypackFrames, figureFrameCount), figureFrameCount, tweenCount),
+		slowdownFactor,
+	),
+)
+
+// figureFrameCount is how many frames at the start are the running figure.
+const figureFrameCount = 7
 
 var bodypackFrames = []string{
 `
@@ -1110,4 +1118,77 @@ func reshapeFigureFrames(frames []string, n int) []string {
 		res[i] = widenFrame(squashFrame(res[i]), figureWidthStretch)
 	}
 	return res
+}
+
+// slowdownFactor shows each frame this many times in a row.
+// 1 = original speed, 2 = half speed, 3 = a third of the speed, and so on.
+const slowdownFactor = 3
+
+// repeatFrames repeats every frame n times in a row, which slows the animation
+// down without touching the timing code.
+func repeatFrames(frames []string, n int) []string {
+	if n <= 1 {
+		return frames
+	}
+	res := make([]string, 0, len(frames)*n)
+	for _, f := range frames {
+		for i := 0; i < n; i++ {
+			res = append(res, f)
+		}
+	}
+	return res
+}
+
+// tweenCount is how many generated in-between frames are inserted between each
+// pair of figure frames. 0 = off, 3 = 4x as many figure frames.
+const tweenCount = 3
+
+// blendFrames mixes two frames: t=0 gives a, t=1 gives b. Each character's
+// brightness is interpolated, so the figure fades from one pose to the next.
+func blendFrames(a, b string, t float64) string {
+	la, nl := splitFrame(a)
+	lb, _ := splitFrame(b)
+	h := maxInt(len(la), len(lb))
+
+	out := make([]string, h)
+	for i := 0; i < h; i++ {
+		ra, rb := "", ""
+		if i < len(la) {
+			ra = la[i]
+		}
+		if i < len(lb) {
+			rb = lb[i]
+		}
+		w := maxInt(len(ra), len(rb))
+		row := make([]byte, w)
+		for x := 0; x < w; x++ {
+			v := float64(levelAt(ra, x))*(1-t) + float64(levelAt(rb, x))*t
+			row[x] = brightnessRamp[int(v+0.5)]
+		}
+		out[i] = strings.TrimRight(string(row), " ")
+	}
+	return joinFrame(out, nl)
+}
+
+// tweenFigureFrames inserts generated frames between consecutive figure frames
+// (the first n frames). Banner/block frames after them are left untouched.
+func tweenFigureFrames(frames []string, n, inserts int) []string {
+	if n > len(frames) {
+		n = len(frames)
+	}
+	if inserts <= 0 || n < 2 {
+		return frames
+	}
+
+	res := make([]string, 0, len(frames)+(n-1)*inserts)
+	for i := 0; i < n; i++ {
+		res = append(res, frames[i])
+		if i+1 < n {
+			for k := 1; k <= inserts; k++ {
+				t := float64(k) / float64(inserts+1)
+				res = append(res, blendFrames(frames[i], frames[i+1], t))
+			}
+		}
+	}
+	return append(res, frames[n:]...)
 }
